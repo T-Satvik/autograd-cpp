@@ -8,7 +8,4 @@ No ML libraries. Everything - tensors, reverse-mode autodiff, optimizers, ODE so
 
 **Day 1 (2026-10-10):** building module A1 - the scalar autodiff core.
 
-## Build
-
-Requires LLVM clang++ (C++17).
 
