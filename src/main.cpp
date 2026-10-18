@@ -3,10 +3,9 @@
 //
 
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <stack>
-#include <set>
+#include "Tokenizer.h"
+#include "token.h"
+#include "main_tokenizer.h"
 
 /*
 template <typename t>
@@ -28,117 +27,34 @@ class Map {
 };
 */
 
-struct token {
-    char sign;
-    double value;
-};
 
-class tokenizer{
-    private:
-    std::vector<token> toks;
+class calculator_tokenwise {
+private:
+    main_tokenizer& branchs;
     public:
-    tokenizer():toks(){};
-    tokenizer(const std::vector<token> &ces): toks(ces) {};
-    void add_token(const token &t) {
-        toks.push_back(t);
-    }
-    std::istream input_tokens(std::istream &is) {
-        token t;
-        t.sign = is.get();
-        t.value = is.get();
-        add_token(t);
-    }
+    calculator_tokenwise(main_tokenizer& bran):branchs(bran) {};
 
-    void generate_tokens(const std::string & st) {
-        std::string substring = "";
-        char previous =' ';
-        for (int i = 0; i < st.length(); i++) {
-            switch (st[i]) {
-                case '+' : {if (previous == ' ') {
-                    token t;
-                    t.sign = 'a';
-                    t.value = stod(substring);
-                    add_token(t);
-                    substring = "";
-                    previous = st[i];
-                }else {
-                    throw "Invalid input format";
-                    break;
-                }}
-                case '-': {
-                    if (previous == ' ') {
-                        token t;
-                        t.sign = 'a';
-                        t.value = stod(substring);
-                        add_token(t);
-                        substring = "";
-                        previous = st[i];
-                    }else {
-                        throw "Invalid input format";
-                        break;
-                    }
-                }
-                case '*': {if (previous == ' ') {
-                    token t;
-                    t.sign = 'm';
-                    t.value = stod(substring);
-                    add_token(t);
-                    substring = "";
-                    previous = st[i];
-                }else {
-                    throw "Invalid input format";
-                    break;
-                }}
-                case '/': {if (previous == ' ') {
-                    token t;
-                    t.sign = 'd';
-                    t.value = stod(substring);
-                    add_token(t);
-                    substring = "";
-                    previous = st[i];
-                }else {
-                    throw "Invalid input format";
-                    break;
-                }}
-                case '^': {if (previous == ' ') {
-                    token t;
-                    t.sign = 'e';
-                    t.value = stod(substring);
-                    add_token(t);
-                    substring = "";
-                    previous = st[i];
-                }}
-                case '(': {if (previous == ' ') {
-                    int j = i;
-                    std::string sub = "";
-                    bool close = false;
-                    while (close == false) {
-                        if (st[j] != ')') {
-                            sub += st[j];
-                            j += 1;
-                        } else {
-                            close = true;
-                        }
-                    }
-                    token t;
-                    t.sign = 'g';
-                    add_token(t);
-                    generate_tokens(sub);
-                }}
-                default: {substring += st[i];}
+    double solve(tokenizer& subs) {
+        double sum = 0;
+        int i,j = 0;
+        token t = subs[0];
+        sum = t.value;
+        for (i < subs.size(); i++;) {
+            if (i<subs.size()-1) {j = i+1;}
+            token t = subs[i];
+            switch (t.sign) {
+                case 'm' : {sum *= t.value;}
+                case 'd' : {sum /= t.value;}
             }
         }
     }
-};
 
-class calculator {
-private:
-    tokenizer toks;
-    public:
-    calculator(const tokenizer &t):toks(t){};
-    double calculate() {
-        for (auto& tk : toks) {
+    void placeback() {
+        for (int i = 0; i < branchs.size_of(); i++) {
+            tokenizer sub = branchs.return_tokens(i);
+            for (int j = 0; j < sub.size(); j++) {
 
+            }
         }
     }
 };
