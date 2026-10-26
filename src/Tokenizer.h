@@ -14,6 +14,7 @@ class tokenizer{
     public:
     tokenizer():toks(){};
     tokenizer(const std::vector<token> &ces): toks(ces) {};
+
     void add_token(const token &t) {
         toks.push_back(t);
     }
@@ -22,27 +23,31 @@ class tokenizer{
         return toks[i];
     }
 
+
+    void output() {
+        for (token& t : toks) {
+            std::cout << t;
+        }
+        std::cout<<-1<<std::endl;
+    }
+
     bool operator==(const tokenizer&t) const {
         if (toks.size() != t.toks.size()) {
             return false;
         }
-        int count = 0;
         for (int i=0;i<toks.size();i++) {
-            if (toks[i] == t.toks[i]) {
-                count++;
-            }
-            if (i > count) {
+            if (toks[i] != t.toks[i]) {
                 return false;
             }
         }
         return true;
     }
 
-    int size() const {
+    [[nodiscard]] int size() const {
         return toks.size();
     }
 
-    token return_tokens(int i) const{
+    [[nodiscard]] const token& return_tokens(int i) const{
         return toks.at(i);
     }
 };

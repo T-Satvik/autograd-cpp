@@ -8,28 +8,31 @@
 #include <vector>
 #include "Tokenizer.h"
 #include "token.h"
-#include <cmath>
+
 
 class main_tokenizer {
 private:
     std::unique_ptr<std::vector<tokenizer>> subs_branch;
-    tokenizer& main;
+    tokenizer main;
 public:
 
-    int size_of() const{
+    [[nodiscard]] int size_of() const{
         return subs_branch->size();
     }
-    tokenizer return_tokens(const int& i) const{
+    [[nodiscard]] const tokenizer& return_tokens(const int& i) const{
         return subs_branch->at(i);
     };
 
-    main_tokenizer(tokenizer& main): main(main) {};
+    main_tokenizer(const tokenizer& main): main(main), subs_branch(std::make_unique<std::vector<tokenizer>>()) {};
 
-    bool operator==(int i) {
-        if (subs_branch->at(i) == main) {}
+    [[nodiscard]] bool matching(int i) const{
+        if (subs_branch->at(i) == main) {
+            return true;
+        }
+        return false;
     }
 
-    int index(tokenizer& subs) const {
+    [[nodiscard]] int index(const tokenizer& subs) const {
         int count = 0;
         while (count < subs_branch->size()) {
             if (subs_branch->at(count) == subs) {
@@ -37,135 +40,159 @@ public:
             }
             count++;
         }
+        return -1;
     }
 
-    /*
-    double static solver(std::string& substring) {
-        double result = 0.0;
-        int step =0,count = 0;
-        std::string local_sub = "", local_rec = "";
-        while (step < substring.length()) {
-            if (substring[step] == '(') {
-                count += 1;
-                step += 1;
-                while (substring[step] != ')') {
-                    local_rec += substring[step];
-                    count += 1;
-                    step += 1;
-                    if (step == substring.length()-1) {
-                        throw "Invalid input";
-                    }
-                }
-                step += 1;
-                substring.erase(step,count+step);
-                result += solver(local_rec);
-                local_rec = "";
-            }
-            local_sub += substring[step];
-            step += 1;
+    void output_tokens() const{
+        for (auto & i : *subs_branch) {
+            i.output();
         }
-        */
+    }
 
-    void add_token(tokenizer& subs,std::string &st) {
-        std::string substring = "";
+    void add_token(tokenizer& subs,std::string& st) {
+        std::string substring ;
         char previous = ' ';
         int i = 0;
         while (i < st.length()) {
             switch (st[i]) {
                 case '+': {
-                    token t;
-                    t.sign = 'a';
-                    t.value = stod(substring);
+                    token t{};
+                    t.sign = '+';
+                    if (substring.empty()) {
+                        t.value = 0.00;
+                    } else {
+                        t.value = stod(substring);
+                    }
                     subs.add_token(t);
                     substring = "";
-                    i += 1;
+                    previous = st[i];
+                    i++;
+                    break;
                 }
                 case '-': {
-                    token t;
-                    t.sign = 'a';
-                    t.value = stod('-' + substring);
+                    token t{};
+                    t.sign = '-';
+                    if (substring.empty()) {
+                        t.value = 0.00;
+                    } else {
+                        t.value = stod(substring);
+                    }
                     subs.add_token(t);
                     substring = "";
-                    i +=1;
+                    previous = st[i];
+                    i++;
+                    break;
                 }
                 case '*': {
                     if (previous != '*' && previous != '/' && previous != '^' && previous != '+' && previous != '-') {
-                        token t;
-                        t.sign = 'm';
-                        if (st[i+1] == '-') {
-                            t.value = stod('-'+substring);
-                            i+=1;
-                        } else {t.value = stod(substring);}
+                        token t{};
+                        t.sign = '*';
+                        if (substring.empty()) {
+                            throw std::invalid_argument("Invalid input format for multiplication");
+                        } else {
+                            t.value = stod(substring);
+                        }
                         subs.add_token(t);
                         substring = "";
                         previous = st[i];
-                        i+= 1;
+                        i++;
                     } else {
-                        throw "Invalid input format";
+                        throw std::invalid_argument("Invalid input format for multiplication");
                     }
+                    break;
                 }
                 case '/': {
                     if (previous != '/' && previous != '*' && previous != '^' && previous != '+' && previous != '-') {
-                        token t;
-                        t.sign = 'd';
-                        if (st[i+1] == '-') {
-                            t.value = stod('-'+substring);
-                            i+=1;
-                        }else {t.value = stod(substring);}
+                        token t{};
+                        t.sign = '/';
+                        if (substring.empty()) {
+                            throw std::invalid_argument("Invalid input format for division");
+                        } else {
+                            t.value = stod(substring);
+                        }
                         subs.add_token(t);
                         substring = "";
                         previous = st[i];
                         i += 1;
                     } else {
-                        throw "Invalid input format";
+                        throw std::invalid_argument("Invalid input format for divison");
                     }
+                    break;
                 }
                 case '^': {
                     if (previous != '^' && previous != '*' && previous != '/' && previous != '+' && previous != '-') {
-                        token t;
-                        t.sign = 'e';
-                        if (st[i+1] != '(') {
-                            throw "Invalid input format";
+                        token t{};
+                        t.sign = '^';
+                        if (substring.empty()) {
+                            throw std::invalid_argument("Invalid input format for exponent");
+                        } else {
+                            t.value = stod(substring);
                         }
-                        if (st[i+1] == '-') {
-                            t.value = stod('-'+substring);
-                            i += 1;
-                        }else {t.value = stod(substring);}
+
                         subs.add_token(t);
                         substring = "";
-                        i += (k-i+1);
                         previous = st[i];
+                        i++;
                     } else {
-                        throw "Invalid input format";
+                        throw std::invalid_argument("Invalid input format for exponent");
                     }
+                    break;
                 }
                 case '(': {
-                    if (previous == ' ') {
-                        int j = i+1;
-                        std::string substr = "";
-                        bool close = false;
-                        while (close == false) {
-                            if (st[j] != ')' || j<st.length()) {
-                                substr += st[j];
-                                j += 1;
-                            } else {
-                                close = true;
+                    int depth = 1;
+                    int j = i + 1;
+                    std::string substr;
+                    bool close = false;
+                    while (close == false) {
+                        if (j < st.length() && depth != 0) {
+                            if (st[j] == '(') {
+                                depth++;
                             }
+                            if (st[j] == ')') {
+                                depth--;
+                                if (depth == 0){break;}
+                            }
+                            substr += st[j];
+                            j += 1;
                         }
-                        st.erase(i,j);
-                        i = j+1;
-                        token t;
-                        t.sign = 'g';
-                        tokenizer ts;
-                        add_token(ts,substr);
-                        substring = "";
-                        subs_branch->push_back(ts);
-                        t.value = index(subs_branch->at(i));
+                        else {
+                            close = true;
+                        }
+                    }
+                    if (j<st.length()) {
+                        if (st[j] != ')' || depth != 0) {
+                            throw std::invalid_argument("Invalid input format for parenthesis");
+                        }
+                    } else {
+                        throw std::invalid_argument("Unclosed parathesis");
+                    }
+                    i = j + 1;
+                    token t{};
+                    t.sign = 'p';
+                    tokenizer ts;
+                    add_token(ts, substr);
+                    substring = "";
+                    subs_branch->push_back(ts);
+                    t.value = index(ts);
+                    subs.add_token(t);
+                    break;
+                }
+                default: {
+                    substring += st[i];
+                    previous = st[i];
+                    i++;
+                    if (i == st.length()) {
+                        token t{};
+                        t.sign = 'n';
+                        if (substring.empty()) {
+                            t.value = 0.00;
+                        }else {
+                            t.value = stod(substring);
+                        }
                         subs.add_token(t);
-                        i += 1;
+                        break;
                     }
                 }
-                default: { substring += st[i]; previous = st[i]; i+=1;}
             }
         }
     }

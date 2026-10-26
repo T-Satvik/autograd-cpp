@@ -27,7 +27,7 @@ class Map {
 };
 */
 
-
+/*
 class calculator_tokenwise {
 private:
     main_tokenizer& branchs;
@@ -58,7 +58,20 @@ private:
         }
     }
 };
+*/
 
 int main() {
+
+    try {
+        tokenizer subs;
+        main_tokenizer main(subs);
+        std::string st = "256-89";
+        main.add_token(subs, st);
+        main.output_tokens();
+    }catch (std::string& e) {
+        std::cerr << e << std::endl;
+    }catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
 
 }
