@@ -6,6 +6,6 @@ No ML libraries. Everything from reverse-mode autodiff, optimizers, ODE solvers,
 
 ## Status
 
-**Day 1 (2026-10-10):** building module A1 - the scalar autodiff core.
+Trouble shooting session.
 
 
